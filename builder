@@ -17,6 +17,7 @@
 #	  9 - Requested tag already exist
 #	 10 - Refused to build fractional release
 #	100 - Unknown error (should not happen)
+#   110 - Functions not yet implemented
 
 # Notes (todo/bugs):
 # - when Icon: field is present, -5 and -a5 doesn't work
@@ -689,6 +690,10 @@ Exit_error() {
 			remove_build_requires
 			echo >&2 "Error: conditions reject building this spec (${2})."
 			exit 12 ;;
+		"err_not_implemented" )
+			remov_build_requires
+			echo >&2 "Error: functionality not yet imlemented"
+			exit 110 ;;
 	esac
 	echo >&2 "Unknown error."
 	exit 100
