@@ -745,33 +745,22 @@ get_spec() {
 	fi
 
 	if [ "$NOCVSSPEC" != "yes" ]; then
-		if [ ! -s CVS/Root -a "$NOCVSSPEC" != "yes" ]; then
-			echo "Warning: No CVS access defined - using local .spec file"
-			NOCVSSPEC="yes"
-		fi
-
-		if [ -d "$ASSUMED_NAME" -a -s "$ASSUMED_NAME/CVS/Root" ]; then
-			cvsup "$ASSUMED_NAME/$SPECFILE" || Exit_error err_no_spec_in_repo
+		if [ -d "$ASSUMED_NAME/.git" ]; then
+			GIT_DIR=$PACKAGE_DIR/.git git pull  || Exit_error err_no_spec_in_repo
 		elif [ "$ADD_PACKAGE_CVS" = "yes" ]; then
 			if [ ! -r "$ASSUMED_NAME/$SPECFILE" ]; then
 				echo "ERROR: No package to add ($ASSUMED_NAME/$SPECFILE)" >&2
 				exit 101
 			fi
-			if [ ! -s "$ASSUMED_NAME/CVS/Root" ]; then
-				cvsup -a $ASSUMED_NAME || Exit_error err_cvs_add_failed
-			fi
-			cvsup -a "$ASSUMED_NAME/$SPECFILE" || Exit_error err_cvs_add_failed
+			Exit_error err_not_implemented
 		else
-			cvsup -c -d $ASSUMED_NAME "packages/$ASSUMED_NAME/$SPECFILE" || {
+			git clone  ${GIT_SERVER}/${ASSUMED_NAME}.git || {
 				# softfail if new package, i.e not yet added to cvs
 				[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
 				echo "Warning: package not in CVS - assuming new package"
 				NOCVSSPEC="yes"
 				NOCVS="yes"
 			}
-
-			# remove Entries.Static -- so 'cvs up' would update all files in a repo
-			rm -f "$ASSUMED_NAME/CVS/Entries.Static"
 		fi
 
 		cvsignore_df .cvsignore
