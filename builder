@@ -1084,8 +1084,8 @@ get_files() {
 	if [ $# -gt 0 ]; then
 		cd "$PACKAGE_DIR"
 
-		if [ ! -s CVS/Root -a "$NOCVS" != "yes" ]; then
-			echo "Warning: No CVS access defined for SOURCES"
+		if [ ! -s .git -a "$NOCVS" != "yes" ]; then
+			echo "Warning: No git access defined for SOURCES"
 			NOCVS="yes"
 		fi
 
