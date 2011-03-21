@@ -763,7 +763,7 @@ get_spec() {
 			}
 		fi
 
-		cvsignore_df .cvsignore
+		cvsignore_df .gitignore
 
 		# add default log format to .cvsignore if it is relative to package dir
 		if [ -n "$LOGFILE" -a "$LOGFILE" = "${LOGFILE##*/}" ]; then
@@ -903,7 +903,7 @@ cvsignore_df() {
 	if [ "$CVSIGNORE_DF" != "yes" ]; then
 		return
 	fi
-	cvsignore=${PACKAGE_DIR}/.cvsignore
+	cvsignore=${PACKAGE_DIR}/.gitignore
 
 	# add only if not yet there
 	if ! awk -vf="$1" -vc=1 '$0 == f { c = 0 } END { exit c }' $cvsignore 2>/dev/null; then
