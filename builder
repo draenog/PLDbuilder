@@ -115,6 +115,7 @@ CVSIGNORE_DF="yes"
 CVS_RETRIES=${MAX_CVS_RETRIES:-1000}
 CVS_SERVER="cvs.pld-linux.org"
 CVSTAG=""
+GIT_SERVER="git://github.com/draenog"
 
 RES_FILE=""
 
