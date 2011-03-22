@@ -2122,7 +2122,7 @@ while [ $# -gt 0 ]; do
 		-c | --clean )
 			CLEAN="--clean"; shift ;;
 		-cf | --cvs-force )
-			CVS_FORCE="-F"; shift;;
+			CVS_FORCE="-f"; shift;;
 		-d | --cvsroot )
 			shift; CVSROOT="${1}"; shift ;;
 		-g | --get )
