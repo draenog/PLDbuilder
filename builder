@@ -1311,70 +1311,28 @@ tag_files() {
 	local TAGVER
 	if [ "$TAG_VERSION" = "yes" ]; then
 		TAGVER=`make_tagver`
-		echo "CVS tag: $TAGVER"
+		echo "tag: $TAGVER"
 	fi
 	if [ -n "$TAG" ]; then
-		echo "CVS tag: $TAG"
+		echo "tag: $TAG"
 	fi
 
 	local OPTIONS="tag $CVS_FORCE"
-	if [ -n "$CVSROOT" ]; then
-		OPTIONS="-d $CVSROOT $OPTIONS"
-	fi
 
-	# if a tagname we are about to set already exists
-	# and happens to be a branch (common case with AC-branch)
-	# pass -B (allows -F to disturb branch tag)
 	local _tag=$TAG
 	if [ "$TAG_VERSION" = "yes" ]; then
 		_tag=$TAGVER
 	fi;
-	is_tag_a_branch $_tag
-	if [ $? -eq 0 -a $CVS_NSERVER -eq 0 ]; then
-		OPTIONS="$OPTIONS -B"
-	fi;
 
 	cd "$PACKAGE_DIR"
-	local tag_files
-	for i in $TAG_FILES; do
-		# don't tag files stored on distfiles
-		[ -n "`src_md5 $i`" ] && continue
-		local fp=`nourl "$i"`
-		if [ -f "$fp" ]; then
-			tag_files="$tag_files $fp"
-		elif [ -n "GREEDSRC" ]; then
-			get_greed_sources $i
-		else
-			Exit_error err_no_source_in_repo $i
-		fi
-	done
 
-	if [ "$tag_files" ]; then
-		if [ "$TAG_VERSION" = "yes" ]; then
-			update_shell_title "tag sources: $TAGVER"
-			printf "Tagging %d files\n" $(echo $tag_files | wc -w)
-			$CVS_COMMAND $OPTIONS $TAGVER $tag_files || exit
-		fi
-		if [ -n "$TAG" ]; then
-			update_shell_title "tag sources: $TAG"
-
-			while [ "$tag_files" ]; do
-				local chunk=$(echo $tag_files | tr ' ' '\n' | head -n 100)
-				printf "Tagging %d files\n" $(echo $chunk | wc -w)
-				$CVS_COMMAND $OPTIONS $TAG $chunk || exit
-				tag_files=$(echo $tag_files | tr ' ' '\n' | tail +101)
-			done
-		fi
-	fi
-
-	cd "$PACKAGE_DIR"
 	if [ "$TAG_VERSION" = "yes" ]; then
-		update_shell_title "tag spec: $TAGVER"
-		$CVS_COMMAND $OPTIONS $TAGVER $SPECFILE || exit
+		update_shell_title "tag sources: $TAGVER"
+		git $OPTIONS $TAGVER || exit
 	fi
 	if [ -n "$TAG" ]; then
-		update_shell_title "tag spec: $TAG"
-		$CVS_COMMAND $OPTIONS $TAG $SPECFILE || exit
+		update_shell_title "tag sources: $TAG"
+		git $OPTIONS $TAG $chunk || exit
 	fi
 }
 
