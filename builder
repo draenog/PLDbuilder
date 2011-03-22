@@ -1338,45 +1338,18 @@ tag_files() {
 
 branch_files() {
 	TAG=$1
-	echo "CVS branch tag: $TAG"
+	echo "Git branch: $TAG"
 	shift
-
-	TAG_FILES="$@"
 
 	if [ -n "$DEBUG" ]; then
 		set -x
 		set -v
 	fi
 
-	local OPTIONS="tag $CVS_FORCE -b"
-
-	# branch exists?
-	is_tag_a_branch $TAG
-	if [ $? -eq 1 ]; then
-		OPTIONS="$OPTIONS -B"
-	fi
-
-	if [ -n "$CVSROOT" ]; then
-		OPTIONS="-d $CVSROOT $OPTIONS"
-	fi
-	cd "$PACKAGE_DIR"
-	local tag_files
-	for i in $TAG_FILES; do
-		local fp=`nourl "$i"`
-		if [ -f "$fp" ]; then
-			tag_files="$tag_files $fp"
-		elif [ -n "GREEDSRC" ]; then
-			get_greed_sources $i
-		else
-			Exit_error err_no_source_in_repo $i
-		fi
-	done
-	if [ "$tag_files" ]; then
-		$CVS_COMMAND $OPTIONS $TAG $tag_files || exit
-	fi
+	local OPTIONS="branch $CVS_FORCE"
 
 	cd "$PACKAGE_DIR"
-	$CVS_COMMAND $OPTIONS $TAG $SPECFILE || exit
+	git $OPTIONS $TAG || exit
 }
 
 
@@ -2527,7 +2500,7 @@ case "$COMMAND" in
 
 		get_spec
 		parse_spec
-		branch_files $TAG $SOURCES $PATCHES $ICONS
+		branch_files $TAG
 		;;
 	"add_cvs" )
 		init_builder
