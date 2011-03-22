@@ -1181,14 +1181,6 @@ get_files() {
 						rm -f "$target"
 						FROM_DISTFILES=0
 					fi
-				elif [ "$NOCVS" != "yes" -a -z "$srcmd5" ]; then
-					if [ $# -gt 1 ]; then
-						get_files_cvs="$get_files_cvs $fp"
-						update_shell_title "$fp (will cvs up later)"
-						cvsup=1
-					else
-						cvsup $fp
-					fi
 				fi
 
 				if [ -z "$NOURLS" ] && [ ! -f "$fp" -o -n "$UPDATE" ] && [ "`echo $i | grep -E 'ftp://|http://|https://'`" ]; then
@@ -1250,9 +1242,6 @@ get_files() {
 		done
 		SHELL_TITLE_PREFIX=""
 
-		if [ "$get_files_cvs" ]; then
-			cvsup $get_files_cvs
-		fi
 
 		if [ "$CHMOD" = "yes" ]; then
 			CHMOD_FILES=$(nourl "$@")
