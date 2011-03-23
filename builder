@@ -784,6 +784,10 @@ get_spec() {
 		fi
 	fi
 
+	if [ -n "$CVSTAG" ]; then
+		GIT_WORK_TREE=$PACKAGE_DIR GIT_DIR=$PACKAGE_DIR/.git git checkout "$CVSTAG" || exit
+	fi
+
 	if [ ! -f "$ASSUMED_NAME/$SPECFILE" ]; then
 		Exit_error err_no_spec_in_repo
 	fi
