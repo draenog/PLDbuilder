@@ -915,67 +915,6 @@ cvsignore_df() {
 	fi
 }
 
-cvsup() {
-	update_shell_title "cvsup"
-	local OPTIONS="" ACTION="up"
-
-	# checkout
-	if [ "$1" = "-c" ]; then
-		ACTION="co"
-		shift
-	fi
-	# add
-	if [ "$1" = "-a" ]; then
-		ACTION="add"
-		shift
-	fi
-
-	OPTIONS="$ACTION "
-
-	if [ -n "$CVSROOT" ]; then
-		OPTIONS="-d $CVSROOT $OPTIONS"
-	fi
-
-	if [ "$ACTION" != "add" ]; then
-		if [ -z "$CVSDATE" -a -z "$CVSTAG" ]; then
-			OPTIONS="$OPTIONS -A"
-		else
-			if [ -n "$CVSDATE" ]; then
-				OPTIONS="$OPTIONS -D $CVSDATE"
-			fi
-			if [ -n "$CVSTAG" ]; then
-				# FIXME: cvs add actually works with -r ?
-				OPTIONS="$OPTIONS -r $CVSTAG"
-			fi
-		fi
-	fi
-
-	local result=1
-	local retries_counter=0
-	if [ $# = 1 ]; then
-		update_shell_title "cvsup: $*"
-	else
-		update_shell_title "cvsup: $# files"
-	fi
-	while [ "$result" != "0" -a "$retries_counter" -le "$CVS_RETRIES" ]; do
-		retries_counter=$(( $retries_counter + 1 ))
-		output=$(LC_ALL=C $CVS_COMMAND $OPTIONS "$@" 2>&1)
-		result=$?
-		[ -n "$output" ] && echo "$output"
-		if echo "$output" | grep -qE "(Cannot connect to|connect to .* failed|Connection reset by peer|Connection timed out|Unknown host)" \
-			&& [ "$result" -ne "0" -a "$retries_counter" -le "$CVS_RETRIES" ]; then
-			echo "Trying again [$*]... ($retries_counter)"
-			update_shell_title "cvsup: retry #$retries_counter"
-			sleep 2
-			continue
-		else
-			break
-		fi
-	done
-	update_shell_title "cvsup: done!"
-	return $result
-}
-
 # returns true if "$1" is ftp, http or https protocol url
 is_url() {
 	case "$1" in
@@ -1275,26 +1214,6 @@ make_tagver() {
 
 	TAGVER=${TAGVER%#*}
 	echo -n "$TAGVER"
-}
-
-# bool is_tag_a_branch(tag)
-#
-# returns 1 if a tag is a branch set on SPECFILE
-is_tag_a_branch() {
-	if [ -n "$DEBUG" ]; then
-		set -x
-		set -v
-	fi
-
-	if [ $# -ne 1 ]; then
-		return 0;
-	fi
-
-	TAG=$1
-
-	cd "$PACKAGE_DIR"
-	$CVS_COMMAND status -v $SPECFILE | grep -Eiq "${TAG}.+(branch: [0-9.]+)"
-	return $?
 }
 
 tag_files() {
