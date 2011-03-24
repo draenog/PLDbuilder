@@ -221,13 +221,6 @@ if [ -d $HOME/rpm/SOURCES ]; then
 	exit 1
 fi
 
-#
-# are we using cvs-nserver ?
-#
-CVS_NSERVER=0
-$CVS_COMMAND --version 2>&1 | grep -q 'CVS-nserver'
-[ $? -eq 0 ] && CVS_NSERVER=1
-
 POLDEK_INDEX_DIR="$($RPM --eval %_rpmdir)/"
 POLDEK_CMD="$SU_SUDO /usr/bin/poldek --noask"
 
