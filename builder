@@ -1646,7 +1646,7 @@ display_bconds() {
 display_branches() {
 	if [ "$NOCVSSPEC" != "yes" ]; then
 		echo -n "Available branches: "
-		$CVS_COMMAND status -v "${SPECFILE}" | awk '!/Sticky Tag:/ && /\(branch:/ { print $1 } ' | xargs
+		git branch -r | grep '^  origin' | grep -v origin/HEAD | sed 's#^ *origin/##' | xargs
 	fi
 }
 
