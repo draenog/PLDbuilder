@@ -65,7 +65,6 @@ ADD5=""
 NO5=""
 ALWAYS_CVSUP=${ALWAYS_CVSUP:-"yes"}
 CVSROOT=""
-GREEDSRC=""
 
 # use rpm 4.4.6+ digest format instead of comments if non-zero
 USEDIGEST=
@@ -260,7 +259,7 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version] [--as_anon] [-a|--a
 [-g|--get] [-h|--help] [--ftp] [--http] [{-l|--logtofile} <logfile>] [-m|--mr-proper]
 [-q|--quiet] [--date <yyyy-mm-dd> [-r <cvstag>] [{-T|--tag <cvstag>]
 [-Tvs|--tag-version-stable] [-Ts|--tag-stable] [-Tv|--tag-version]
-[{-Tp|--tag-prefix} <prefix>] [{-tt|--test-tag}] [--use-greed-sources]
+[{-Tp|--tag-prefix} <prefix>] [{-tt|--test-tag}]
 [-nu|--no-urls] [-v|--verbose] [--opts <rpm opts>] [--short-circuit]
 [--show-bconds] [--with/--without <feature>] [--define <macro> <value>]
 <package>[.spec][:cvstag]
@@ -369,9 +368,6 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version] [--as_anon] [-a|--a
                     - as above, but allow float version
 					php-pear-Services_Digg/
 --upgrade-version   - upgrade to specified version in try-upgrade
---use-greed-sources
-                    - try download source from tag head if don't find it in
-                      current tag
 -U, --update        - refetch sources, don't use distfiles, and update md5 comments
 -Upi, --update-poldek-indexes
                     - refresh or make poldek package index files.
@@ -1145,11 +1141,7 @@ get_files() {
 
 			# the md5 check must be moved elsewhere as if we've called from update_md5 the md5 is wrong.
 			if [ ! -f "$fp" -a "$FAIL_IF_NO_SOURCES" != "no" ]; then
-				if [ -n "GREEDSRC" ]; then
-					get_greed_sources $i
-				else
-					Exit_error err_no_source_in_repo $i
-				fi
+				Exit_error err_no_source_in_repo $i
 			fi
 
 			# we check md5 here just only to refetch immediately
@@ -1917,18 +1909,6 @@ init_rpm_dir() {
 	echo "- edit $TOP_DIR/CVS/Root"
 }
 
-get_greed_sources() {
-	CVSROOT=":pserver:cvs@$CVS_SERVER:/cvsroot"
-	if [ -n "BE_VERBOSE" ]; then
-		echo "Try greed download: $1 from: $CVSROOT"
-	fi
-	$CVS_COMMAND -d $CVSROOT get SOURCES/$1
-	if [ $? != 0 ]; then
-		Exit_error err_no_source_in_repo $1
-	fi
-
-}
-
 # remove entries from CVS/Entries
 cvs_entry_remove() {
 	local cvsdir="$1"; shift
@@ -2188,9 +2168,6 @@ while [ $# -gt 0 ]; do
 		--init-rpm-dir)
 			COMMAND="init_rpm_dir"
 			shift ;;
-		--use-greed-sources )
-			GREEDSRC="1"
-			shift;;
 		-u | --try-upgrade )
 			TRY_UPGRADE="1"; shift ;;
 		--upgrade-version )
