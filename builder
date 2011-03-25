@@ -734,7 +734,7 @@ get_spec() {
 
 	if [ "$NOCVSSPEC" != "yes" ]; then
 		if [ -d "$ASSUMED_NAME/.git" ]; then
-			GIT_DIR=$PACKAGE_DIR/.git git pull  || Exit_error err_no_spec_in_repo
+			GIT_DIR=$PACKAGE_DIR/.git git fetch origin || Exit_error err_no_spec_in_repo
 		elif [ "$ADD_PACKAGE_CVS" = "yes" ]; then
 			if [ ! -r "$ASSUMED_NAME/$SPECFILE" ]; then
 				echo "ERROR: No package to add ($ASSUMED_NAME/$SPECFILE)" >&2
@@ -773,6 +773,8 @@ get_spec() {
 
 	if [ -n "$CVSTAG" ]; then
 		GIT_WORK_TREE=$PACKAGE_DIR GIT_DIR=$PACKAGE_DIR/.git git checkout "$CVSTAG" || exit
+		GIT_DIR=$PACKAGE_DIR/.git git symbolic-ref -q HEAD > /dev/null &&
+			GIT_WORK_TREE=$PACKAGE_DIR GIT_DIR=$PACKAGE_DIR/.git git merge '@{u}'
 	fi
 
 	if [ ! -f "$ASSUMED_NAME/$SPECFILE" ]; then
