@@ -2349,8 +2349,8 @@ case "$COMMAND" in
 			TREE_PREFIX=$(echo "$TAG_PREFIX" | sed -e 's#^auto-\([a-zA-Z]\+\)-.*#\1#g')
 			if [ "$TREE_PREFIX" != "$TAG_PREFIX" ]; then
 				TAG_BRANCH="${TREE_PREFIX}-branch"
-				TAG_STATUS=$($CVS_COMMAND status -v $SPECFILE | grep -Ei "${TAG_BRANCH}.+(branch: [0-9.]+)")
-				if [ -n "$TAG_STATUS" -a "$CVSTAG" = "HEAD" ]; then
+				TAG_STATUS=$(git branch -r | grep -i "origin/$TAG_BRANCH$" | sed 's# *origin/##')
+				if [ -n "$TAG_STATUS" -a -z "$CVSTAG" ]; then
 					Exit_error err_branch_exists "$TAG_STATUS"
 				fi
 			fi
