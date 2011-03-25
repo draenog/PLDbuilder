@@ -55,7 +55,6 @@ QUIET=""
 CLEAN=""
 DEBUG=""
 NOURLS=""
-NOCVS=""
 NOCVSSPEC=""
 NODIST=""
 NOINIT=""
@@ -299,7 +298,6 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version] [--as_anon] [-a|--a
 --ftp, --http       - use ftp or http protocol to access distfiles server
 -l <logfile>, --logtofile <logfile>
                     - log all to file,
--nc, --no-cvs       - don't download sources from CVS, if source URL is given,
 -ncs, --no-cvs-specs
                     - don't check specs in CVS
 -nd, --no-distfiles - don't download from distfiles
@@ -749,7 +747,6 @@ get_spec() {
 				[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
 				echo "Warning: package not in CVS - assuming new package"
 				NOCVSSPEC="yes"
-				NOCVS="yes"
 			}
 		fi
 
@@ -1012,11 +1009,6 @@ get_files() {
 
 	if [ $# -gt 0 ]; then
 		cd "$PACKAGE_DIR"
-
-		if [ ! -s .git -a "$NOCVS" != "yes" ]; then
-			echo "Warning: No git access defined for SOURCES"
-			NOCVS="yes"
-		fi
 
 		local nc=0
 		local get_files_cvs=""
@@ -1944,7 +1936,6 @@ while [ $# -gt 0 ]; do
 		-a5 | --add-md5 )
 			COMMAND="update_md5"
 			NODIST="yes"
-			NOCVS="yes"
 			NOCVSSPEC="yes"
 			ADD5="yes"
 			shift ;;
@@ -2008,8 +1999,6 @@ while [ $# -gt 0 ]; do
 			SKIP_EXISTING_FILES="yes"; shift ;;
 		-m | --mr-proper )
 			COMMAND="mr-proper"; shift ;;
-		-nc | --no-cvs )
-			NOCVS="yes"; shift ;;
 		-ncs | --no-cvs-specs )
 			NOCVSSPEC="yes"; shift ;;
 		-nd | --no-distfiles )
@@ -2023,7 +2012,6 @@ while [ $# -gt 0 ]; do
 		-ns0 | --no-source0 )
 			NOSOURCE0="yes"; shift ;;
 		-nn | --no-net )
-			NOCVS="yes"
 			NOCVSSPEC="yes"
 			NODIST="yes"
 			NOMIRRORS="yes"
