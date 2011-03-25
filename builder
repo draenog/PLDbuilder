@@ -115,6 +115,7 @@ CVS_RETRIES=${MAX_CVS_RETRIES:-1000}
 CVS_SERVER="cvs.pld-linux.org"
 CVSTAG=""
 GIT_SERVER="git://github.com/draenog"
+HEAD_DETACHED=""
 
 RES_FILE=""
 
@@ -2218,11 +2219,16 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-[ -d "$ASSUMED_NAME" ] && CVS_ENTRIES="$ASSUMED_NAME/CVS/Entries" || CVS_ENTRIES="CVS/Entries"
-if [ -f "$CVS_ENTRIES" ] && [ -z "$CVSTAG" ]; then
-	CVSTAG=$(awk -vSPECFILE=$(basename $SPECFILE) -F/ '$2 == SPECFILE && $6 ~ /^T/{print substr($6, 2)}' ${CVS_ENTRIES})
-	if [ "$CVSTAG" ]; then
-		echo >&2 "builder: Sticky tag $CVSTAG active. Use -r TAGNAME to override."
+[ -d "$ASSUMED_NAME" ] && GIT_DIR="$ASSUMED_NAME/.git" || GIT_DIR=.git
+if [ -d "$GIT_DIR" ] && [ -z "$CVSTAG" ]; then
+	if CVSTAG=$(GIT_DIR=$GIT_DIR git symbolic-ref HEAD) 2>/dev/null; then
+		CVSTAG=${CVSTAG#refs/heads/}
+		if [ "$CVSTAG" != "master" ]; then
+			echo >&2 "builder: Active branch $CVSTAG. Use -r BRANCHNAME to override"
+		fi
+	else
+		echo >&2 "On detached HEAD. Use -r BRANCHNAME to override"
+		HEAD_DETACHED="yes"
 	fi
 elif [ "$CVSTAG" = "HEAD" ]; then
 	# assume -r HEAD is same as -A
