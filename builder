@@ -2078,7 +2078,7 @@ while [ $# -gt 0 ]; do
 		   	;;
 		-A)
 			shift
-			CVSTAG="HEAD"
+			CVSTAG="master"
 		   	;;
 		-R | --fetch-build-requires)
 			FETCH_BUILD_REQUIRES="yes"
@@ -2227,7 +2227,7 @@ if [ -d "$GIT_DIR" ] && [ -z "$CVSTAG" ]; then
 	fi
 elif [ "$CVSTAG" = "HEAD" ]; then
 	# assume -r HEAD is same as -A
-	CVSTAG=""
+	CVSTAG="master"
 fi
 
 if [ "$CVSTAG" ]; then
