@@ -742,12 +742,15 @@ get_spec() {
 			fi
 			Exit_error err_not_implemented
 		else
-			git clone  ${GIT_SERVER}/${ASSUMED_NAME}.git || {
-				# softfail if new package, i.e not yet added to cvs
-				[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
-				echo "Warning: package not in CVS - assuming new package"
-				NOCVSSPEC="yes"
-			}
+			(
+				unset GIT_WORK_TREE
+				git clone  ${GIT_SERVER}/${ASSUMED_NAME}.git || {
+					# softfail if new package, i.e not yet added to cvs
+					[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
+					echo "Warning: package not in CVS - assuming new package"
+					NOCVSSPEC="yes"
+				}
+			)
 		fi
 
 		cvsignore_df .gitignore
