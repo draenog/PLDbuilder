@@ -1929,7 +1929,12 @@ mr_proper() {
 	init_builder
 	NOCVSSPEC="yes"
 	DONT_PRINT_REVISION="yes"
-	Exit_error err_not_implemented
+	get_spec
+	parse_spec
+
+	# remove spec and sources
+	$RPMBUILD --clean --rmsource --rmspec --nodeps --define "_specdir $PACKAGE_DIR" --define "_sourcedir $PACKAGE_DIR" $SPECFILE
+	rm -rf $PACKAGE_DIR/.git
 }
 
 #---------------------------------------------
