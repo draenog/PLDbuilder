@@ -680,7 +680,7 @@ Exit_error() {
 			echo >&2 "Error: conditions reject building this spec (${2})."
 			exit 12 ;;
 		"err_not_implemented" )
-			remov_build_requires
+			remove_build_requires
 			echo >&2 "Error: functionality not yet imlemented"
 			exit 110 ;;
 	esac
