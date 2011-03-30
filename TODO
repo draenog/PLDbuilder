@@ -1,5 +1,5 @@
 find_mirror - what to do with mirrors file
 
-src_md5 - is it still used
+src_md5:  is it worth to keep additional-md5sums
 
 init_rpm_dir
