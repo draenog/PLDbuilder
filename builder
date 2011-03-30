@@ -780,6 +780,9 @@ get_spec() {
 		git checkout "$CVSTAG" -- || exit
 		git symbolic-ref -q HEAD > /dev/null &&
 			git merge '@{u}'
+		if [ -n "CVSDATE" ]; then
+			git checkout $(git rev-list -n1 --before="'$CVSDATE'" $CVSTAG) || exit 1
+		fi
 	fi
 
 	if [ ! -f "$ASSUMED_NAME/$SPECFILE" ]; then
