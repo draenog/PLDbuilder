@@ -115,6 +115,7 @@ CVS_SERVER="cvs.pld-linux.org"
 CVSTAG=""
 GIT_SERVER="git://github.com/draenog"
 HEAD_DETACHED=""
+DEPTH=""
 
 RES_FILE=""
 
@@ -248,7 +249,7 @@ usage() {
 	echo "\
 Usage: builder [-D|--debug] [-V|--version] [--short-version] [--as_anon] [-a|--add_cvs] [-b|-ba|--build]
 [-bb|--build-binary] [-bs|--build-source] [-bc] [-bi] [-bl] [-u|--try-upgrade]
-[{-cf|--cvs-force}] [{-B|--branch} <branch>] [{-d|--cvsroot} <cvsroot>]
+[{-cf|--cvs-force}] [{-B|--branch} <branch>] [{-d|--cvsroot} <cvsroot>] [--depth <number>]
 [-g|--get] [-h|--help] [--ftp] [--http] [{-l|--logtofile} <logfile>] [-m|--mr-proper]
 [-q|--quiet] [--date <yyyy-mm-dd> [-r <cvstag>] [{-T|--tag <cvstag>]
 [-Tvs|--tag-version-stable] [-Ts|--tag-stable] [-Tv|--tag-version]
@@ -288,6 +289,8 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version] [--as_anon] [-a|--a
                     - setup \$CVSROOT,
 --define <macro> <value>
                     - define a macro <macro> with value <value>,
+--depth <number>
+					- make shallow fetch
 --alt_kernel <kernel>
                     - same as --define 'alt_kernel <kernel>'
 --nodeps            - rpm won't check any dependences
@@ -735,24 +738,38 @@ get_spec() {
 	fi
 
 	if [ "$NOCVSSPEC" != "yes" ]; then
-		if [ -d "$ASSUMED_NAME/.git" ]; then
-			git fetch origin || Exit_error err_no_spec_in_repo
-		elif [ "$ADD_PACKAGE_CVS" = "yes" ]; then
-			if [ ! -r "$ASSUMED_NAME/$SPECFILE" ]; then
-				echo "ERROR: No package to add ($ASSUMED_NAME/$SPECFILE)" >&2
-				exit 101
+		if [ -z "$DEPTH" ]; then
+			if [ -d "$ASSUMED_NAME/.git" ]; then
+				git fetch origin || Exit_error err_no_spec_in_repo
+			elif [ "$ADD_PACKAGE_CVS" = "yes" ]; then
+				if [ ! -r "$ASSUMED_NAME/$SPECFILE" ]; then
+					echo "ERROR: No package to add ($ASSUMED_NAME/$SPECFILE)" >&2
+					exit 101
+				fi
+				Exit_error err_not_implemented
+			else
+				(
+					unset GIT_WORK_TREE
+					git clone  ${GIT_SERVER}/${ASSUMED_NAME}.git || {
+						# softfail if new package, i.e not yet added to cvs
+						[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
+						echo "Warning: package not in CVS - assuming new package"
+						NOCVSSPEC="yes"
+					}
+				)
 			fi
-			Exit_error err_not_implemented
 		else
-			(
-				unset GIT_WORK_TREE
-				git clone  ${GIT_SERVER}/${ASSUMED_NAME}.git || {
-					# softfail if new package, i.e not yet added to cvs
-					[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
-					echo "Warning: package not in CVS - assuming new package"
-					NOCVSSPEC="yes"
-				}
-			)
+			if [ ! -d "$ASSUMED_NAME/.git" ]; then
+				if [ ! -d "$ASSUMED_NAME" ]; then
+					mkdir $ASSUMED_NAME
+				fi
+				git init
+				git remote add origin ${GIT_SERVER}/${ASSUMED_NAME}.git
+			fi
+			git fetch "$DEPTH" origin ${CVSTAG}:remotes/origin/${CVSTAG} || {
+				echo >&2 "Error: branch $CVSTAG does not exist"
+				exit 3
+			}
 		fi
 
 		cvsignore_df .gitignore
@@ -1987,6 +2004,10 @@ while [ $# -gt 0 ]; do
 			CVS_FORCE="-f"; shift;;
 		-d | --cvsroot )
 			shift; CVSROOT="${1}"; shift ;;
+		--depth )
+			DEPTH="--depth=$2"
+			shift 2
+			;;
 		-g | --get )
 			COMMAND="get"; shift ;;
 		-h | --help )
