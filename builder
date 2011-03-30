@@ -1934,7 +1934,7 @@ mr_proper() {
 
 	# remove spec and sources
 	$RPMBUILD --clean --rmsource --rmspec --nodeps --define "_specdir $PACKAGE_DIR" --define "_sourcedir $PACKAGE_DIR" $SPECFILE
-	rm -rf $PACKAGE_DIR/.git
+	rm -rf $PACKAGE_DIR/.git .gitignore
 }
 
 #---------------------------------------------
