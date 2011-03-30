@@ -840,13 +840,8 @@ src_md5() {
 	local md5
 
 	if [ -f additional-md5sums ]; then
-		local spec_rev=$(grep $SPECFILE CVS/Entries 2>/dev/null | sed -e s:/$SPECFILE/:: -e s:/.*::)
-		if [ -z "$spec_rev" ]; then
-			spec_rev=$(head -n 1 $SPECFILE | sed -e 's/.*\$Revision: \([0-9.]*\).*/\1/')
-		fi
-		local spec="$SPECFILE[0-9.,]*,$(echo $spec_rev | sed 's/\./\\./g')"
 		md5=$(grep -s -v '^#' additional-md5sums | \
-		grep -E "[ 	]$(basename "$1")[ 	]+${spec}([ 	,]|\$)" | \
+		grep -E "[ 	]$(basename "$1")([ 	,]|\$)" | \
 		sed -e 's/^\([0-9a-f]\{32\}\).*/\1/' | \
 		grep -E '^[0-9a-f]{32}$')
 
