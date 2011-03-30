@@ -2079,7 +2079,9 @@ while [ $# -gt 0 ]; do
 		-q | --quiet )
 			QUIET="--quiet"; shift ;;
 		--date )
-			CVSDATE="${2}"; shift 2 ;;
+			CVSDATE="${2}"; shift 2
+			date -d "$CVSDATE" > /dev/null 2>&1 || { echo >&2 "No valid date specified"; exit 3; }
+			;;
 		-r | --cvstag )
 			CVSTAG="$2"
 		   	shift 2
