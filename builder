@@ -1928,22 +1928,6 @@ init_rpm_dir() {
 	init_builder
 }
 
-# remove entries from CVS/Entries
-cvs_entry_remove() {
-	local cvsdir="$1"; shift
-	if [ ! -d "$cvsdir" ]; then
-		echo >&2 "cvs_entry_remove: $cvsdir is not a directory"
-		exit 1
-	fi
-
-	for file in "$@"; do
-		rm -f $cvsdir/CVS/Entries.new || return 1
-		awk -ve="${file##*/}" -F/ '$2 != e {print}' $cvsdir/CVS/Entries > $cvsdir/CVS/Entries.new || return 1
-		mv -f $cvsdir/CVS/Entries.new $cvsdir/CVS/Entries || return 1
-	done
-	return 0
-}
-
 mr_proper() {
 	init_builder
 	NOCVSSPEC="yes"
