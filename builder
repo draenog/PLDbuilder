@@ -777,7 +777,7 @@ get_spec() {
 	fi
 
 	if [ -n "$CVSTAG" ]; then
-		git checkout "$CVSTAG" -- || exit
+		git checkout "$CVSTAG" -- 2>/dev/null || git checkout -t "origin/$CVSTAG" > /dev/null || exit
 		git symbolic-ref -q HEAD > /dev/null &&
 			git merge '@{u}'
 	fi
