@@ -63,7 +63,6 @@ UPDATE=""
 ADD5=""
 NO5=""
 ALWAYS_CVSUP=${ALWAYS_CVSUP:-"yes"}
-CVSROOT=""
 
 # use rpm 4.4.6+ digest format instead of comments if non-zero
 USEDIGEST=
@@ -107,11 +106,8 @@ ASSUMED_NAME=""
 PROTOCOL="http"
 WGET_RETRIES=${MAX_WGET_RETRIES:-0}
 
-CVS_COMMAND=${CVS_COMMAND:-cvs}
 CVS_FORCE=""
 CVSIGNORE_DF="yes"
-CVS_RETRIES=${MAX_CVS_RETRIES:-1000}
-CVS_SERVER="cvs.pld-linux.org"
 CVSTAG=""
 GIT_SERVER="git://github.com/draenog"
 HEAD_DETACHED=""
@@ -247,9 +243,9 @@ run_poldek() {
 usage() {
 	if [ -n "$DEBUG" ]; then set -xv; fi
 	echo "\
-Usage: builder [-D|--debug] [-V|--version] [--short-version] [--as_anon] [-a|--add_cvs] [-b|-ba|--build]
+Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b|-ba|--build]
 [-bb|--build-binary] [-bs|--build-source] [-bc] [-bi] [-bl] [-u|--try-upgrade]
-[{-cf|--cvs-force}] [{-B|--branch} <branch>] [{-d|--cvsroot} <cvsroot>] [--depth <number>]
+[{-cf|--cvs-force}] [{-B|--branch} <branch>] [--depth <number>]
 [-g|--get] [-h|--help] [--ftp] [--http] [{-l|--logtofile} <logfile>] [-m|--mr-proper]
 [-q|--quiet] [--date <yyyy-mm-dd> [-r <cvstag>] [{-T|--tag <cvstag>]
 [-Tvs|--tag-version-stable] [-Ts|--tag-stable] [-Tv|--tag-version]
@@ -265,7 +261,6 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version] [--as_anon] [-a|--a
 -debug              - produce rpm debug package (same as --opts -debug)
 -V, --version       - output builder version string
 --short-version     - output builder short version
---as_anon           - get files via pserver as cvs@$CVS_SERVER,
 -a, --add_cvs       - try add new package to CVS.
 -b, -ba, --build    - get all files from CVS repo or HTTP/FTP and build package
                       from <package>.spec,
@@ -285,8 +280,6 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version] [--as_anon] [-a|--a
 					  SPECS and \$RPM_BUILD_ROOT and CVS/Entries). Doesn't run
 					  any rpm building.
 -cf, --cvs-force	- use -F when tagging (useful when moving branches)
--d <cvsroot>, --cvsroot <cvsroot>
-                    - setup \$CVSROOT,
 --define <macro> <value>
                     - define a macro <macro> with value <value>,
 --depth <number>
@@ -1918,7 +1911,7 @@ init_rpm_dir() {
 	local srpmdir=$(eval $RPM $RPMOPTS --eval '%{_srcrpmdir}')
 	local tmp
 
-	echo "Initializing rpm directories to $TOP_DIR from $CVSROOT"
+	echo "Initializing rpm directories to $TOP_DIR from $GIT_SERVER"
 	mkdir -p $TOP_DIR $rpmdir $buildir $srpmdir
 
 	GIT_WORK_TREE=${TOP_DIR}/rpm-build-tools git clone  ${GIT_SERVER}/rpm-build-tools.git || 
@@ -1972,8 +1965,6 @@ while [ $# -gt 0 ]; do
 			COMMAND="version"; shift ;;
 		--short-version )
 			COMMAND="short-version"; shift ;;
-		--as_anon )
-			CVSROOT=":pserver:cvs@$CVS_SERVER:/cvsroot"; shift ;;
 		-a | --add_cvs)
 			COMMAND="add_cvs";
 			shift ;;
@@ -1997,8 +1988,6 @@ while [ $# -gt 0 ]; do
 			CLEAN="--clean"; shift ;;
 		-cf | --cvs-force )
 			CVS_FORCE="-f"; shift;;
-		-d | --cvsroot )
-			shift; CVSROOT="${1}"; shift ;;
 		--depth )
 			DEPTH="--depth=$2"
 			shift 2
