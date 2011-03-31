@@ -392,6 +392,31 @@ tempfile() {
 	mktemp -t builder.XXXXXX || ${TMPDIR:-/tmp}/builder.$RANDOM.$$
 }
 
+# inserts git log instead of %changelog
+# outputs name of modified file created by tempfile
+insert_gitlog() {
+	local SPECFILE=$1 specfile=$(tempfile) gitlog=$(tempfile) speclog=$(tempfile) 
+
+	# allow this being customized
+	local log_entries=$(rpm -E '%{?_buildchangelogtruncate}')
+
+	# rpm5.org/rpm.org do not parse any other date format than 'Wed Jan 1 1997'
+	# otherwise i'd use --date=iso here
+	# http://rpm5.org/cvs/fileview?f=rpm/build/parseChangelog.c&v=2.44.2.1
+	# http://rpm.org/gitweb?p=rpm.git;a=blob;f=build/parseChangelog.c#l31
+	# NOTE: changelog date is always in UTC for rpmbuild
+	# * 1265749244 +0000 Random Hacker <nikt@pld-linux.org> 9370900
+	git log -${log_entries:-20} --format=format:"* %ad %an <%ae> %h%n%s%n" --date=raw > $gitlog
+	gawk '/^\* /{printf("* %s %s\n", strftime("%a %b %d %Y", $2), substr($0, length($1)+length($2)+length($3)+4)); next}{print}' $gitlog > $speclog
+	sed '/^%changelog/,$d' $SPECFILE | sed -e "\${
+			a%changelog
+			r $speclog
+		}
+	" > $specfile
+	rm -f $gitlog $speclog
+	echo $specfile
+}
+
 # change dependency to specname
 # common changes:
 # - perl(Package::Name) -> perl-Package-Name
@@ -1399,10 +1424,11 @@ build_package() {
 			echo "LASTLOG=$LOG" > $LASTLOG_FILE
 		fi
 		RES_FILE=$(tempfile)
+		local specfile=$(insert_gitlog $SPECFILE)
 
-		(time eval ${NICE_COMMAND} $RPMBUILD $TARGET_SWITCH $BUILD_SWITCH -v $QUIET $CLEAN $RPMOPTS $RPMBUILDOPTS $BCOND --define \'_specdir $PACKAGE_DIR\' --define \'_sourcedir $PACKAGE_DIR\' $SPECFILE; echo $? > $RES_FILE) 2>&1 |tee $LOG
+		(time eval ${NICE_COMMAND} $RPMBUILD $TARGET_SWITCH $BUILD_SWITCH -v $QUIET $CLEAN $RPMOPTS $RPMBUILDOPTS $BCOND --define \'_specdir $PACKAGE_DIR\' --define \'_sourcedir $PACKAGE_DIR\' $specfile; echo $? > $RES_FILE) 2>&1 |tee $LOG
 		RETVAL=`cat $RES_FILE`
-		rm $RES_FILE
+		rm $RES_FILE $specfile
 		if [ -n "$LOGDIROK" ] && [ -n "$LOGDIRFAIL" ]; then
 			if [ "$RETVAL" -eq "0" ]; then
 				mv $LOG $LOGDIROK
