@@ -1912,7 +1912,6 @@ fetch_build_requires()
 }
 
 init_rpm_dir() {
-	local CVSROOT=":pserver:cvs@$CVS_SERVER:/cvsroot"
 	local TOP_DIR=$(eval $RPM $RPMOPTS --eval '%{_topdir}')
 	local rpmdir=$(eval $RPM $RPMOPTS --eval '%{_rpmdir}')
 	local buildir=$(eval $RPM $RPMOPTS --eval '%{_builddir}')
@@ -1922,25 +1921,11 @@ init_rpm_dir() {
 	echo "Initializing rpm directories to $TOP_DIR from $CVSROOT"
 	mkdir -p $TOP_DIR $rpmdir $buildir $srpmdir
 
-	# need to checkout to tmp dir or we can't name our topdir
-	tmp=$(TMPDIR= TEMPDIR= mktemp -p $TOP_DIR -d) || exit 1
-	cd $tmp
-	$CVS_COMMAND -d $CVSROOT co packages/{.cvsignore,rpm.groups,dropin,mirrors,md5,adapter{,.awk},fetchsrc_request,builder,{relup,compile,repackage}.sh,ci,civim}
-	cd -
-	mv $tmp/packages/* $TOP_DIR
-	rm -rf $tmp
-
+	GIT_WORK_TREE=${TOP_DIR}/rpm-build-tools git clone  ${GIT_SERVER}/rpm-build-tools.git || 
+	for a in dropin md5 adapter builder {relup,compile,repackage,rsync,pearize}.sh pldnotify.awk; do
+		ln -s rpm-build-tools/$a .
+	done
 	init_builder
-
-	echo "To checkout *all* .spec files (read-only):"
-	echo "- run cvs co SPECS"
-
-	echo "To checkout *all* packages:"
-	echo "- run cvs up -dP in $TOP_DIR dir"
-
-	echo ""
-	echo "To commit with your developer account:"
-	echo "- edit $TOP_DIR/CVS/Root"
 }
 
 # remove entries from CVS/Entries
