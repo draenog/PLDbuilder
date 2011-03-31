@@ -247,12 +247,12 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 [-bb|--build-binary] [-bs|--build-source] [-bc] [-bi] [-bl] [-u|--try-upgrade]
 [{-cf|--cvs-force}] [{-B|--branch} <branch>] [--depth <number>]
 [-g|--get] [-h|--help] [--ftp] [--http] [{-l|--logtofile} <logfile>] [-m|--mr-proper]
-[-q|--quiet] [--date <yyyy-mm-dd> [-r <cvstag>] [{-T|--tag <cvstag>]
+[-q|--quiet] [--date <yyyy-mm-dd> [-r <tag>] [{-T|--tag <tag>]
 [-Tvs|--tag-version-stable] [-Ts|--tag-stable] [-Tv|--tag-version]
 [{-Tp|--tag-prefix} <prefix>] [{-tt|--test-tag}]
 [-nu|--no-urls] [-v|--verbose] [--opts <rpm opts>] [--short-circuit]
 [--show-bconds] [--with/--without <feature>] [--define <macro> <value>]
-<package>[.spec][:cvstag]
+<package>[.spec][:tag]
 
 -5, --update-md5    - update md5 comments in spec, implies -nd -ncs
 -a5, --add-md5      - add md5 comments to URL sources, implies -nc -nd -ncs
@@ -261,25 +261,25 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 -debug              - produce rpm debug package (same as --opts -debug)
 -V, --version       - output builder version string
 --short-version     - output builder short version
--a, --add_cvs       - try add new package to CVS.
--b, -ba, --build    - get all files from CVS repo or HTTP/FTP and build package
+-a, --add_cvs       - try add new package to PLD repo.
+-b, -ba, --build    - get all files from PLD repo or HTTP/FTP and build package
                       from <package>.spec,
--bb, --build-binary - get all files from CVS repo or HTTP/FTP and build binary
+-bb, --build-binary - get all files from PLD repo or HTTP/FTP and build binary
                       only package from <package>.spec,
 -bp, --build-prep   - execute the %prep phase of <package>.spec,
 -bc                 - execute the %build phase of <package>.spec,
 -bi                 - execute the %install phase of <package>.spec
 -bl					- execute the %files phase of <package>.spec
--bs, --build-source - get all files from CVS repo or HTTP/FTP and only pack
+-bs, --build-source - get all files from PLD repo or HTTP/FTP and only pack
                       them into src.rpm,
 --short-circuit     - short-circuit build
 -B, --branch        - add branch
 -c, --clean         - clean all temporarily created files (in BUILD\$RPM_BUILD_ROOT) after rpmbuild commands.
                       may be used with building process.
 -m, --mr-proper     - clean all temporarily created files (in BUILD, SOURCES,
-					  SPECS and \$RPM_BUILD_ROOT and CVS/Entries). Doesn't run
+					  SPECS and \$RPM_BUILD_ROOT). Doesn't run
 					  any rpm building.
--cf, --cvs-force	- use -F when tagging (useful when moving branches)
+-cf, --cvs-force	- use -f when tagging
 --define <macro> <value>
                     - define a macro <macro> with value <value>,
 --depth <number>
@@ -287,7 +287,7 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 --alt_kernel <kernel>
                     - same as --define 'alt_kernel <kernel>'
 --nodeps            - rpm won't check any dependences
--g, --get           - get <package>.spec and all related files from CVS repo
+-g, --get           - get <package>.spec and all related files from PLD repo
                       or HTTP/FTP,
 -h, --help          - this message,
 -jN, -j N           - set %_smp_mflags to propagate concurrent jobs
@@ -295,7 +295,7 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 -l <logfile>, --logtofile <logfile>
                     - log all to file,
 -ncs, --no-cvs-specs
-                    - don't check specs in CVS
+                    - don't pull from PLD repo
 -nd, --no-distfiles - don't download from distfiles
 -nm, --no-mirrors   - don't download from mirror, if source URL is given,
 -nu, --no-urls      - don't try to download from FTP/HTTP location,
@@ -308,9 +308,9 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 --skip-existing-files - skip existing files in get_files
 --opts <rpm opts>   - additional options for rpm
 -q, --quiet         - be quiet,
---date yyyy-mm-dd   - build package using resources from specified CVS date,
--r <cvstag>, --cvstag <cvstag>
-                    - build package using resources from specified CVS tag,
+--date yyyy-mm-dd   - build package using resources from specified date,
+-r <tag>, --cvstag <ref>
+                    - build package using resources from specified branch/tag,
 -A                  - build package using CVS resources as any sticky tags/date/kopts being reset.
 -R, --fetch-build-requires
                     - fetch what is BuildRequired,
@@ -323,7 +323,7 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 -sd, --source-distfiles - list sources available from distfiles (intended for offline
                       operations; does not work when Icon field is present
                       but icon file is absent),
--sc, --source-cvs - list sources available from CVS
+-sc, --source-cvs - list sources available from PLD repo
 -sdp, --source-distfiles-paths - list sources available from distfiles -
                       paths relative to distfiles directory (intended for offline
                       operations; does not work when Icon field is present
@@ -336,14 +336,14 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
                       but icon file is absent),
 -su, --source-urls  - list urls - urls to sources and patches
                       intended for copying urls with spec with lots of macros in urls
--T <cvstag> , --tag <cvstag>
-                    - add cvs tag <cvstag> for files,
+-T <tag> , --tag <tag>
+                    - add git tag <tag> for files,
 -Tvs, --tag-version-stable
-                    - add cvs tags STABLE and NAME-VERSION-RELEASE for files,
+                    - add git tags STABLE and NAME-VERSION-RELEASE for files,
 -Ts, --tag-stable
-                    - add cvs tag STABLE for files,
+                    - add git tag STABLE for files,
 -Tv, --tag-version
-                    - add cvs tag NAME-VERSION-RELEASE for files,
+                    - add git tag NAME-VERSION-RELEASE for files,
 -Tp, --tag-prefix <prefix>
                     - add <prefix> to NAME-VERSION-RELEASE tags,
 -tt, --test-tag <prefix>
