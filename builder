@@ -843,8 +843,8 @@ get_spec() {
 find_mirror() {
 	cd "$REPO_DIR"
 	local url="$1"
-	if [ ! -f "mirrors" -a "$NOCVSSPEC" != "yes" ] ; then
-		$CVS_COMMAND update mirrors >&2
+	if [ ! -f "mirrors"  ] ; then
+		ln -s rpm-build-toos/mirrors .
 	fi
 
 	IFS="|"
@@ -1922,7 +1922,7 @@ init_rpm_dir() {
 	mkdir -p $TOP_DIR $rpmdir $buildir $srpmdir
 
 	GIT_WORK_TREE=${TOP_DIR}/rpm-build-tools git clone  ${GIT_SERVER}/rpm-build-tools.git || 
-	for a in dropin md5 adapter builder {relup,compile,repackage,rsync,pearize}.sh pldnotify.awk; do
+	for a in dropin md5 adapter builder mirrors {relup,compile,repackage,rsync,pearize}.sh pldnotify.awk; do
 		ln -s rpm-build-tools/$a .
 	done
 	init_builder
