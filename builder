@@ -667,14 +667,14 @@ Exit_error() {
 			exit 2 ;;
 		"err_no_spec_in_repo" )
 			remove_build_requires
-			echo >&2 "Error: spec file not stored in CVS repo."
+			echo >&2 "Error: spec file not stored in PLD repo."
 			exit 3 ;;
 		"err_no_source_in_repo" )
 			remove_build_requires
-			echo >&2 "Error: some source, patch or icon files not stored in CVS repo. ($2)"
+			echo >&2 "Error: some source, patch or icon files not stored in PLD repo. ($2)"
 			exit 4 ;;
 		"err_cvs_add_failed" )
-			echo >&2 "Error: failed to add package to CVS repo."
+			echo >&2 "Error: failed to add package to PLD repo."
 			exit 4 ;;
 		"err_build_fail" )
 			remove_build_requires
