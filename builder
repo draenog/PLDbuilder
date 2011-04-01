@@ -783,6 +783,7 @@ get_spec() {
 				fi
 				git init
 				git remote add origin ${GIT_SERVER}/${ASSUMED_NAME}.git
+				CVSTAG=${CVSTAG:-"master"}
 			fi
 			git fetch "$DEPTH" origin ${CVSTAG}:remotes/origin/${CVSTAG} || {
 				echo >&2 "Error: branch $CVSTAG does not exist"
