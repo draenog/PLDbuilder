@@ -112,6 +112,7 @@ CVSTAG=""
 GIT_SERVER="git://github.com/draenog"
 HEAD_DETACHED=""
 DEPTH=""
+REMOTE_PLD="origin"
 
 RES_FILE=""
 
@@ -758,7 +759,7 @@ get_spec() {
 	if [ "$NOCVSSPEC" != "yes" ]; then
 		if [ -z "$DEPTH" ]; then
 			if [ -d "$ASSUMED_NAME/.git" ]; then
-				git fetch origin || Exit_error err_no_spec_in_repo
+				git fetch $REMOTE_PLD || Exit_error err_no_spec_in_repo
 			elif [ "$ADD_PACKAGE_CVS" = "yes" ]; then
 				if [ ! -r "$ASSUMED_NAME/$SPECFILE" ]; then
 					echo "ERROR: No package to add ($ASSUMED_NAME/$SPECFILE)" >&2
@@ -768,7 +769,7 @@ get_spec() {
 			else
 				(
 					unset GIT_WORK_TREE
-					git clone  ${GIT_SERVER}/${ASSUMED_NAME}.git || {
+					git clone  -o $REMOTE_PLD ${GIT_SERVER}/${ASSUMED_NAME}.git || {
 						# softfail if new package, i.e not yet added to PLD rep
 						[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
 						echo "Warning: package not in CVS - assuming new package"
@@ -782,10 +783,10 @@ get_spec() {
 					mkdir $ASSUMED_NAME
 				fi
 				git init
-				git remote add origin ${GIT_SERVER}/${ASSUMED_NAME}.git
+				git remote add $REMOTE_PLD ${GIT_SERVER}/${ASSUMED_NAME}.git
 				CVSTAG=${CVSTAG:-"master"}
 			fi
-			git fetch "$DEPTH" origin ${CVSTAG}:remotes/origin/${CVSTAG} || {
+			git fetch "$DEPTH" $REMOTE_PLD ${CVSTAG}:remotes/${REMOTE_PLD}/${CVSTAG} || {
 				echo >&2 "Error: branch $CVSTAG does not exist"
 				exit 3
 			}
@@ -813,7 +814,7 @@ get_spec() {
 	fi
 
 	if [ -n "$CVSTAG" ]; then
-		git checkout "$CVSTAG" -- 2>/dev/null || git checkout -t "origin/$CVSTAG" > /dev/null || exit
+		git checkout "$CVSTAG" -- 2>/dev/null || git checkout -t "${REMOTE_PLD}/$CVSTAG" > /dev/null || exit
 		git symbolic-ref -q HEAD > /dev/null &&
 			git merge '@{u}'
 		if [ -n "$CVSDATE" ]; then
@@ -1665,7 +1666,7 @@ display_bconds() {
 
 display_branches() {
 	echo -n "Available branches: "
-	git branch -r | grep '^  origin' | grep -v origin/HEAD | sed 's#^ *origin/##' | xargs
+	git branch -r | grep "^  ${REMOTE_PLD}" | grep -v ${REMOTE_PLD}/HEAD | sed "s#^ *${REMOTE_PLD}/##" | xargs
 }
 
 # checks a given list of packages/files/provides agains current rpmdb.
@@ -2355,7 +2356,7 @@ case "$COMMAND" in
 			TREE_PREFIX=$(echo "$TAG_PREFIX" | sed -e 's#^auto-\([a-zA-Z]\+\)-.*#\1#g')
 			if [ "$TREE_PREFIX" != "$TAG_PREFIX" ]; then
 				TAG_BRANCH="${TREE_PREFIX}-branch"
-				TAG_STATUS=$(git branch -r | grep -i "origin/$TAG_BRANCH$" | sed 's# *origin/##')
+				TAG_STATUS=$(git branch -r | grep -i "${REMOTE_PLD}/$TAG_BRANCH$" | sed "s# *${REMOTE_PLD}/##")
 				if [ -n "$TAG_STATUS" -a -z "$CVSTAG" ]; then
 					Exit_error err_branch_exists "$TAG_STATUS"
 				fi
