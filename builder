@@ -311,7 +311,7 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 --date yyyy-mm-dd   - build package using resources from specified date,
 -r <tag>, --cvstag <ref>
                     - build package using resources from specified branch/tag,
--A                  - build package using CVS resources as any sticky tags/date/kopts being reset.
+-A                  - build package using master branch as any sticky tags/branch/date being reset.
 -R, --fetch-build-requires
                     - fetch what is BuildRequired,
 -RB, --remove-build-requires
