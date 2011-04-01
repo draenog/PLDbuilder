@@ -769,7 +769,7 @@ get_spec() {
 				(
 					unset GIT_WORK_TREE
 					git clone  ${GIT_SERVER}/${ASSUMED_NAME}.git || {
-						# softfail if new package, i.e not yet added to cvs
+						# softfail if new package, i.e not yet added to PLD rep
 						[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
 						echo "Warning: package not in CVS - assuming new package"
 						NOCVSSPEC="yes"
@@ -792,7 +792,7 @@ get_spec() {
 
 		cvsignore_df .gitignore
 
-		# add default log format to .cvsignore if it is relative to package dir
+		# add default log format to .gitignore if it is relative to package dir
 		if [ -n "$LOGFILE" -a "$LOGFILE" = "${LOGFILE##*/}" ]; then
 			# substitute known "macros" to glob
 			local logfile=$(echo "$LOGFILE" | sed -e 's,\$\(PACKAGE_NAME\|DATE\),*,g')
