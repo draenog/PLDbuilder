@@ -1663,10 +1663,8 @@ display_bconds() {
 }
 
 display_branches() {
-	if [ "$NOCVSSPEC" != "yes" ]; then
-		echo -n "Available branches: "
-		git branch -r | grep '^  origin' | grep -v origin/HEAD | sed 's#^ *origin/##' | xargs
-	fi
+	echo -n "Available branches: "
+	git branch -r | grep '^  origin' | grep -v origin/HEAD | sed 's#^ *origin/##' | xargs
 }
 
 # checks a given list of packages/files/provides agains current rpmdb.
