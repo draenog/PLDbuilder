@@ -173,6 +173,10 @@ fi
 
 [ -f "$USER_CFG" ] && . "$USER_CFG"
 
+if [ -n "$GIT_LOGINNAME" ]; then
+	GIT_SERVER="git@github.com:${GIT_LOGINNAME}"
+fi
+
 if [ "$SCHEDTOOL" = "auto" ]; then
 	if [ -x /usr/bin/schedtool ] && schedtool -B -e echo >/dev/null; then
 		SCHEDTOOL="schedtool -B -e"
