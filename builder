@@ -1272,10 +1272,12 @@ tag_files() {
 	if [ "$TAG_VERSION" = "yes" ]; then
 		update_shell_title "tag sources: $TAGVER"
 		git $OPTIONS $TAGVER || exit
+		git push $CVS_FORCE $REMOTE_PLD tag $TAGVER
 	fi
 	if [ -n "$TAG" ]; then
 		update_shell_title "tag sources: $TAG"
 		git $OPTIONS $TAG $chunk || exit
+		git push $CVS_FORCE $REMOTE_PLD tag $TAG
 	fi
 }
 
