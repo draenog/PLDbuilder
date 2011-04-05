@@ -790,7 +790,7 @@ get_spec() {
 				git remote add $REMOTE_PLD ${GIT_SERVER}/${ASSUMED_NAME}.git
 				CVSTAG=${CVSTAG:-"master"}
 			fi
-			git fetch "$DEPTH" $REMOTE_PLD ${CVSTAG}:remotes/${REMOTE_PLD}/${CVSTAG} || {
+			git fetch $DEPTH $REMOTE_PLD ${CVSTAG}:remotes/${REMOTE_PLD}/${CVSTAG} || {
 				echo >&2 "Error: branch $CVSTAG does not exist"
 				exit 3
 			}
