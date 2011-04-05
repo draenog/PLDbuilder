@@ -843,7 +843,7 @@ find_mirror() {
 	cd "$REPO_DIR"
 	local url="$1"
 	if [ ! -f "mirrors"  ] ; then
-		ln -s rpm-build-toos/mirrors .
+		ln -s rpm-build-tools/mirrors .
 	fi
 
 	IFS="|"
