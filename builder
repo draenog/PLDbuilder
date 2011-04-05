@@ -113,6 +113,7 @@ GIT_SERVER="git://github.com/draenog"
 HEAD_DETACHED=""
 DEPTH=""
 REMOTE_PLD="origin"
+NEW_REPO=""
 
 RES_FILE=""
 
@@ -266,7 +267,7 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 -debug              - produce rpm debug package (same as --opts -debug)
 -V, --version       - output builder version string
 --short-version     - output builder short version
--a, --add_cvs       - try add new package to PLD repo.
+-a, --add_vcs       - try add new package to PLD repo.
 -b, -ba, --build    - get all files from PLD repo or HTTP/FTP and build package
                       from <package>.spec,
 -bb, --build-binary - get all files from PLD repo or HTTP/FTP and build binary
@@ -705,6 +706,10 @@ Exit_error() {
 			remove_build_requires
 			echo >&2 "Error: conditions reject building this spec (${2})."
 			exit 12 ;;
+		"err_remote_problem" )
+			remove_build_requires
+			echo >&2 "Error: problem with remote (${2})"
+			exit 13 ;;
 		"err_not_implemented" )
 			remove_build_requires
 			echo >&2 "Error: functionality not yet imlemented"
@@ -743,6 +748,26 @@ init_builder() {
 	export GIT_DIR=$PACKAGE_DIR/.git
 
 	__PWD=$(pwd)
+}
+
+create_git_repo() {
+	update_shell_title "add_package"
+
+	if [ -n "$DEBUG" ]; then
+		set -x
+		set -v
+	fi
+
+	cd "$REPO_DIR"
+	SPECFILE=$(basename $SPECFILE)
+	if [ ! -f "$ASSUMED_NAME/$SPECFILE" ]; then
+		echo "ERROR: No package to add ($ASSUMED_NAME/$SPECFILE)" >&2
+		exit 101
+	fi
+	[ -d "$ASSUMED_NAME/.git" ] || NEW_REPO=yes
+	pldpkg.py add ${ASSUMED_NAME} || Exit_error err_cvs_add_failed
+	git init
+	git remote add $REMOTE_PLD ${GIT_SERVER}/${ASSUMED_NAME}.git || Exit_error err_remote_problem $REMOTE_PLD
 }
 
 get_spec() {
@@ -2406,14 +2431,23 @@ case "$COMMAND" in
 			Exit_error err_no_spec_in_cmdl
 		fi
 
-		ADD_PACKAGE_CVS=yes get_spec
-		parse_spec
-
-		if [ -n "$NOSOURCE0" ] ; then
-			SOURCES=`echo $SOURCES | xargs | sed -e 's/[^ ]*//'`
+		create_git_repo
+		if [ -n "$NEW_REPO" ]; then
+			parse_spec
+			local file
+			for file in $SOURCES $PATCHES; do
+				if [ -z $(src_md5 "$file") ]; then
+					git add $file || Exit_error err_no_source_in_repo $file
+				else
+					cvsignore_df `nourl $file`
+				fi
+			done
+			git add $SPECFILE
+			git commit -m 'Initial commit'
+			git push --dry-run $REMOTE_PLD master || Exit_error err_cvs_add_failed
+		else
+			echo "You had already git repository. Push chosen branches to remote: ${REMOTE_PLD}"
 		fi
-		get_files $SOURCES $PATCHES
-		check_md5 $SOURCES
 		;;
 	"get" )
 		init_builder
