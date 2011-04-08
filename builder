@@ -834,7 +834,7 @@ get_spec() {
 
 		# create symlinks for tools
 		if [ "$SYMLINK_TOOLS" != "no" ]; then
-			for a in dropin md5 adapter builder {relup,compile,repackage,rsync,pearize}.sh pldnotify.awk; do
+			for a in dropin md5 adapter builder {relup,compile,repackage,pearize}.sh pldnotify.awk; do
 				[ -f $a ] || continue
 				ln -sf ../$a $ASSUMED_NAME
 				cvsignore_df $a
@@ -1947,7 +1947,7 @@ init_rpm_dir() {
 
 	cd "$TOP_DIR"
 	GIT_WORK_TREE=${TOP_DIR}/rpm-build-tools git clone  ${GIT_SERVER}/rpm-build-tools.git
-	for a in dropin md5 adapter builder mirrors {relup,compile,repackage,rsync,pearize}.sh pldnotify.awk; do
+	for a in dropin md5 adapter builder mirrors {relup,compile,repackage,pearize}.sh pldnotify.awk; do
 		ln -s rpm-build-tools/$a .
 	done
 	init_builder
