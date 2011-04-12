@@ -2386,7 +2386,7 @@ case "$COMMAND" in
 			if [ "$TREE_PREFIX" != "$TAG_PREFIX" ]; then
 				TAG_BRANCH="${TREE_PREFIX}-branch"
 				TAG_STATUS=$(git branch -r | grep -i "${REMOTE_PLD}/$TAG_BRANCH$" | sed "s# *${REMOTE_PLD}/##")
-				if [ "$TAG_STATUS" != "$CVSTAG" ]; then
+				if [ -n "$TAG_STATUS" -a "$TAG_STATUS" != "$CVSTAG" ]; then
 					Exit_error err_branch_exists "$TAG_STATUS"
 				fi
 			fi
