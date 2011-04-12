@@ -1297,12 +1297,12 @@ tag_files() {
 	if [ "$TAG_VERSION" = "yes" ]; then
 		update_shell_title "tag sources: $TAGVER"
 		git $OPTIONS $TAGVER || exit
-		git push $CVS_FORCE $REMOTE_PLD tag $TAGVER
+		git push $CVS_FORCE $REMOTE_PLD tag $TAGVER || Exit_error err_remote_problem $REMOTE_PLD
 	fi
 	if [ -n "$TAG" ]; then
 		update_shell_title "tag sources: $TAG"
 		git $OPTIONS $TAG $chunk || exit
-		git push $CVS_FORCE $REMOTE_PLD tag $TAG
+		git push $CVS_FORCE $REMOTE_PLD tag $TAG || Exit_error err_remote_problem $REMOTE_PLD
 	fi
 }
 
