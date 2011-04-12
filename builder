@@ -1957,13 +1957,10 @@ mr_proper() {
 	init_builder
 	NOCVSSPEC="yes"
 	DONT_PRINT_REVISION="yes"
-	get_spec
-	parse_spec
 
 	# remove spec and sources
-	$RPMBUILD --clean --rmsource --rmspec --nodeps --define "_specdir $PACKAGE_DIR" --define "_sourcedir $PACKAGE_DIR" $SPECFILE
+	$RPMBUILD --clean --rmsource --rmspec --nodeps --define "_specdir $PACKAGE_DIR" --define "_sourcedir $PACKAGE_DIR" $PACKAGE_DIR/$SPECFILE
 	rm -rf $PACKAGE_DIR/.git .gitignore
-	cd $__PWD
 	rmdir --ignore-fail-on-non-empty $PACKAGE_DIR
 }
 
