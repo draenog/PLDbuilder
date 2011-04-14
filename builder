@@ -1946,9 +1946,11 @@ init_rpm_dir() {
 	mkdir -p $TOP_DIR $rpmdir $buildir $srpmdir
 
 	cd "$TOP_DIR"
-	git clone  ${GIT_SERVER}/rpm-build-tools.git ${TOP_DIR}/rpm-build-tools
+	if [ ! -e ../rpm-build-tools ]; then
+		git clone  ${GIT_SERVER}/rpm-build-tools.git ../rpm-build-tools
+	fi
 	for a in dropin md5 adapter builder mirrors {relup,compile,repackage,pearize}.sh pldnotify.awk; do
-		ln -s rpm-build-tools/$a .
+		ln -s ../rpm-build-tools/$a .
 	done
 	init_builder
 }
