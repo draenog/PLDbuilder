@@ -112,6 +112,7 @@ CVSTAG=""
 GIT_SERVER="git://github.com/draenog"
 HEAD_DETACHED=""
 DEPTH=""
+ALL_BRANCHES=""
 REMOTE_PLD="origin"
 NEW_REPO=""
 
@@ -249,7 +250,7 @@ run_poldek() {
 usage() {
 	if [ -n "$DEBUG" ]; then set -xv; fi
 	echo "\
-Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b|-ba|--build]
+Usage: builder [--all-branches] [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b|-ba|--build]
 [-bb|--build-binary] [-bs|--build-source] [-bc] [-bi] [-bl] [-u|--try-upgrade]
 [{-cf|--cvs-force}] [{-B|--branch} <branch>] [--depth <number>]
 [-g|--get] [-h|--help] [--ftp] [--http] [{-l|--logtofile} <logfile>] [-m|--mr-proper]
@@ -262,6 +263,7 @@ Usage: builder [-D|--debug] [-V|--version] [--short-version]  [-a|--add_cvs] [-b
 
 -5, --update-md5    - update md5 comments in spec, implies -nd -ncs
 -a5, --add-md5      - add md5 comments to URL sources, implies -nc -nd -ncs
+--all-branches		- make shallow fetch of all branches; --depth required
 -n5, --no-md5       - ignore md5 comments in spec
 -D, --debug         - enable builder script debugging mode,
 -debug              - produce rpm debug package (same as --opts -debug)
@@ -815,7 +817,11 @@ get_spec() {
 				git remote add $REMOTE_PLD ${GIT_SERVER}/${ASSUMED_NAME}.git
 				CVSTAG=${CVSTAG:-"master"}
 			fi
-			git fetch $DEPTH $REMOTE_PLD ${CVSTAG}:remotes/${REMOTE_PLD}/${CVSTAG} || {
+			local refs=''
+			if [ -z "$ALL_BRANCHES" ]; then
+				refs="${CVSTAG}:remotes/${REMOTE_PLD}/${CVSTAG}"
+			fi
+			git fetch $DEPTH $REMOTE_PLD $refs || {
 				echo >&2 "Error: branch $CVSTAG does not exist"
 				exit 3
 			}
@@ -1999,6 +2005,9 @@ while [ $# -gt 0 ]; do
 		-a | --add_cvs)
 			COMMAND="add_cvs";
 			shift ;;
+		--all-branches )
+			ALL_BRANCHES="yes"
+			shift ;;
 		-b | -ba | --build )
 			COMMAND="build"; shift ;;
 		-bb | --build-binary )
@@ -2276,6 +2285,11 @@ fi
 if [ "$CVSTAG" ]; then
 	# pass $CVSTAG used by builder to rpmbuild too, so specs could use it
 	RPMOPTS="$RPMOPTS --define \"_cvstag $CVSTAG\""
+fi
+
+if [ -n "$ALL_BRANCHES" -a -z "$DEPTH" ]; then
+	echo >&2 "--all branches requires --depth <number>"
+	Exit_error err_invalid_cmdline
 fi
 
 if [ -n "$DEBUG" ]; then
