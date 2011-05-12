@@ -2395,8 +2395,12 @@ case "$COMMAND" in
 		if [ -n "$TEST_TAG" ]; then
 			local TAGVER=`make_tagver`
 			echo "Searching for tag $TAGVER..."
-			git show-ref --quiet --verify "refs/tags/$TAGVER" && Exit_error err_tag_exists "$TAGVER"
-
+			if [ -n "$DEPTH" ]; then
+				local ref=`git ls-remote $REMOTE_PLD "refs/tags/$TAGVER"`
+				[ -n  "$ref" ] && Exit_error err_tag_exists "$TAGVER"
+			else
+				git show-ref --quiet --verify "refs/tags/$TAGVER" && Exit_error err_tag_exists "$TAGVER"
+			fi
 			# - do not allow to build from HEAD when XX-branch exists
 			TREE_PREFIX=$(echo "$TAG_PREFIX" | sed -e 's#^auto-\([a-zA-Z]\+\)-.*#\1#g')
 			if [ "$TREE_PREFIX" != "$TAG_PREFIX" ]; then
