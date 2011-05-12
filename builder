@@ -694,7 +694,7 @@ Exit_error() {
 			exit 6 ;;
 		"err_tag_exists" )
 			remove_build_requires
-			echo >&2 "Tag ${2} already exists (spec release: ${3})."
+			echo >&2 "Tag ${2} already exists"
 			exit 9 ;;
 		"err_fract_rel" )
 			remove_build_requires
@@ -2397,9 +2397,9 @@ case "$COMMAND" in
 			echo "Searching for tag $TAGVER..."
 			if [ -n "$DEPTH" ]; then
 				local ref=`git ls-remote $REMOTE_PLD "refs/tags/$TAGVER"`
-				[ -n  "$ref" ] && Exit_error err_tag_exists "$TAGVER"
+				[ -n  "$ref" ] && echo "$ref" && Exit_error err_tag_exists "$TAGVER"
 			else
-				git show-ref --quiet --verify "refs/tags/$TAGVER" && Exit_error err_tag_exists "$TAGVER"
+				git show-ref --verify "refs/tags/$TAGVER" && Exit_error err_tag_exists "$TAGVER"
 			fi
 			# - do not allow to build from HEAD when XX-branch exists
 			TREE_PREFIX=$(echo "$TAG_PREFIX" | sed -e 's#^auto-\([a-zA-Z]\+\)-.*#\1#g')
