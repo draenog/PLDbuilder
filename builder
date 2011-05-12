@@ -2401,7 +2401,7 @@ case "$COMMAND" in
 			TREE_PREFIX=$(echo "$TAG_PREFIX" | sed -e 's#^auto-\([a-zA-Z]\+\)-.*#\1#g')
 			if [ "$TREE_PREFIX" != "$TAG_PREFIX" ]; then
 				TAG_BRANCH="${TREE_PREFIX}-branch"
-				TAG_STATUS=$(git branch -r | grep -i "${REMOTE_PLD}/$TAG_BRANCH$" | sed "s# *${REMOTE_PLD}/##")
+				TAG_STATUS=$(git show-ref | grep -i "${REMOTE_PLD}/$TAG_BRANCH$")
 				if [ -n "$TAG_STATUS" -a "$TAG_STATUS" != "$CVSTAG" ]; then
 					Exit_error err_branch_exists "$TAG_STATUS"
 				fi
