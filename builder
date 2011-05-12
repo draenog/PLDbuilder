@@ -2399,7 +2399,7 @@ case "$COMMAND" in
 				local ref=`git ls-remote $REMOTE_PLD "refs/tags/$TAGVER"`
 				[ -n  "$ref" ] && echo "$ref" && Exit_error err_tag_exists "$TAGVER"
 			else
-				git show-ref --verify "refs/tags/$TAGVER" && Exit_error err_tag_exists "$TAGVER"
+				git show-ref "refs/tags/$TAGVER" && Exit_error err_tag_exists "$TAGVER"
 			fi
 			# - do not allow to build from HEAD when XX-branch exists
 			TREE_PREFIX=$(echo "$TAG_PREFIX" | sed -e 's#^auto-\([a-zA-Z]\+\)-.*#\1#g')
