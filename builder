@@ -2405,7 +2405,14 @@ case "$COMMAND" in
 			TREE_PREFIX=$(echo "$TAG_PREFIX" | sed -e 's#^auto-\([a-zA-Z]\+\)-.*#\1#g')
 			if [ "$TREE_PREFIX" != "$TAG_PREFIX" ]; then
 				TAG_BRANCH="${TREE_PREFIX}-branch"
-				TAG_STATUS=$(git show-ref | grep -i "${REMOTE_PLD}/$TAG_BRANCH$")
+				if [ -n "$DEPTH" ]; then
+					cmd_branches="git ls-remote --heads"
+					ref_prefix=refs/heads
+				else
+					cmd_branches="git show-ref"
+					ref_prefix=refs/remotes/${REMOTE_PLD}
+				fi
+				TAG_STATUS=$($cmd_branches | grep -i "${ref_prefix}/$TAG_BRANCH$")
 				if [ -n "$TAG_STATUS" -a "$TAG_STATUS" != "$CVSTAG" ]; then
 					Exit_error err_branch_exists "$TAG_STATUS"
 				fi
