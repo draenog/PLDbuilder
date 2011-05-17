@@ -109,7 +109,7 @@ WGET_RETRIES=${MAX_WGET_RETRIES:-0}
 CVS_FORCE=""
 CVSIGNORE_DF="yes"
 CVSTAG=""
-GIT_SERVER="git://github.com/draenog"
+GIT_SERVER="draenog@carme.pld-linux.org:packages"
 HEAD_DETACHED=""
 DEPTH=""
 ALL_BRANCHES=""
@@ -176,7 +176,7 @@ fi
 [ -f "$USER_CFG" ] && . "$USER_CFG"
 
 if [ -n "$GIT_LOGINNAME" ]; then
-	GIT_SERVER="git@github.com:${GIT_LOGINNAME}"
+	GIT_SERVER="draenog@carme.pld-linux.org:packages"
 fi
 
 if [ "$SCHEDTOOL" = "auto" ]; then
