@@ -768,7 +768,7 @@ create_git_repo() {
 		exit 101
 	fi
 	[ -d "$ASSUMED_NAME/.git" ] || NEW_REPO=yes
-	pldpkg.py add ${ASSUMED_NAME} || Exit_error err_cvs_add_failed
+	ssh $GIT_SERVER create ${ASSUMED_NAME} || Exit_error err_cvs_add_failed
 	git init
 	git remote add $REMOTE_PLD ${GIT_SERVER}:${PACKAGES_DIR}/${ASSUMED_NAME}.git || Exit_error err_remote_problem $REMOTE_PLD
 }
