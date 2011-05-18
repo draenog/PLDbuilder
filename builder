@@ -109,7 +109,8 @@ WGET_RETRIES=${MAX_WGET_RETRIES:-0}
 CVS_FORCE=""
 CVSIGNORE_DF="yes"
 CVSTAG=""
-GIT_SERVER="draenog@carme.pld-linux.org:packages"
+GIT_SERVER="draenog@carme.pld-linux.org"
+PACKAGES_DIR="packages"
 HEAD_DETACHED=""
 DEPTH=""
 ALL_BRANCHES=""
@@ -176,7 +177,7 @@ fi
 [ -f "$USER_CFG" ] && . "$USER_CFG"
 
 if [ -n "$GIT_LOGINNAME" ]; then
-	GIT_SERVER="draenog@carme.pld-linux.org:packages"
+	GIT_SERVER="draenog@carme.pld-linux.org"
 fi
 
 if [ "$SCHEDTOOL" = "auto" ]; then
@@ -769,7 +770,7 @@ create_git_repo() {
 	[ -d "$ASSUMED_NAME/.git" ] || NEW_REPO=yes
 	pldpkg.py add ${ASSUMED_NAME} || Exit_error err_cvs_add_failed
 	git init
-	git remote add $REMOTE_PLD ${GIT_SERVER}/${ASSUMED_NAME}.git || Exit_error err_remote_problem $REMOTE_PLD
+	git remote add $REMOTE_PLD ${GIT_SERVER}:${PACKAGES_DIR}/${ASSUMED_NAME}.git || Exit_error err_remote_problem $REMOTE_PLD
 }
 
 get_spec() {
@@ -800,7 +801,7 @@ get_spec() {
 			else
 				(
 					unset GIT_WORK_TREE
-					git clone  -o $REMOTE_PLD ${GIT_SERVER}/${ASSUMED_NAME}.git || {
+					git clone  -o $REMOTE_PLD ${GIT_SERVER}:${PACKAGES_DIR}/${ASSUMED_NAME}.git || {
 						# softfail if new package, i.e not yet added to PLD rep
 						[ ! -f "$ASSUMED_NAME/$SPECFILE" ] && Exit_error err_no_spec_in_repo
 						echo "Warning: package not in CVS - assuming new package"
@@ -814,7 +815,7 @@ get_spec() {
 					mkdir $ASSUMED_NAME
 				fi
 				git init
-				git remote add $REMOTE_PLD ${GIT_SERVER}/${ASSUMED_NAME}.git
+				git remote add $REMOTE_PLD ${GIT_SERVER}:${PACKAGES_DIR}/${ASSUMED_NAME}.git
 				CVSTAG=${CVSTAG:-"master"}
 			fi
 			local refs=''
@@ -1953,7 +1954,7 @@ init_rpm_dir() {
 
 	cd "$TOP_DIR"
 	if [ ! -e ../rpm-build-tools ]; then
-		git clone  ${GIT_SERVER}/rpm-build-tools.git ../rpm-build-tools
+		git clone  ${GIT_SERVER}:${PACKAGES_DIR}/rpm-build-tools.git ../rpm-build-tools
 	fi
 	for a in dropin md5 adapter builder mirrors {relup,compile,repackage,pearize}.sh pldnotify.awk; do
 		ln -s ../rpm-build-tools/$a .
