@@ -2511,8 +2511,11 @@ case "$COMMAND" in
 			Exit_error err_no_spec_in_cmdl
 		fi
 
-		get_spec
 		parse_spec
+		if  [ ! -d .git ]; then
+			echo "No git reposiotory" >&2
+			exit 101
+		fi
 		tag_files
 		;;
 	"mr-proper" )
