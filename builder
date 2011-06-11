@@ -750,6 +750,21 @@ init_builder() {
 	export GIT_WORK_TREE=$PACKAGE_DIR
 	export GIT_DIR=$PACKAGE_DIR/.git
 
+	if [ -d "$GIT_DIR" ] && [ -z "$CVSTAG" ]; then
+		if CVSTAG=$(GIT_DIR=$GIT_DIR git symbolic-ref HEAD) 2>/dev/null; then
+			CVSTAG=${CVSTAG#refs/heads/}
+			if [ "$CVSTAG" != "master" ]; then
+				echo >&2 "builder: Active branch $CVSTAG. Use -r BRANCHNAME to override"
+			fi
+		else
+			echo >&2 "On detached HEAD. Use -r BRANCHNAME to override"
+			HEAD_DETACHED="yes"
+		fi
+	elif [ "$CVSTAG" = "HEAD" ]; then
+		# assume -r HEAD is same as -A
+		CVSTAG="master"
+	fi
+
 	__PWD=$(pwd)
 }
 
@@ -2266,22 +2281,6 @@ while [ $# -gt 0 ]; do
 			ASSUMED_NAME=$(basename ${SPECFILE%%.spec})
 	esac
 done
-
-[ -d "$ASSUMED_NAME" ] && GIT_DIR="$ASSUMED_NAME/.git" || GIT_DIR=.git
-if [ -d "$GIT_DIR" ] && [ -z "$CVSTAG" ]; then
-	if CVSTAG=$(GIT_DIR=$GIT_DIR git symbolic-ref HEAD) 2>/dev/null; then
-		CVSTAG=${CVSTAG#refs/heads/}
-		if [ "$CVSTAG" != "master" ]; then
-			echo >&2 "builder: Active branch $CVSTAG. Use -r BRANCHNAME to override"
-		fi
-	else
-		echo >&2 "On detached HEAD. Use -r BRANCHNAME to override"
-		HEAD_DETACHED="yes"
-	fi
-elif [ "$CVSTAG" = "HEAD" ]; then
-	# assume -r HEAD is same as -A
-	CVSTAG="master"
-fi
 
 if [ "$CVSTAG" ]; then
 	# pass $CVSTAG used by builder to rpmbuild too, so specs could use it
